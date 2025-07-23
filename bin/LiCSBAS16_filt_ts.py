@@ -139,6 +139,7 @@ import LiCSBAS_io_lib as io_lib
 import LiCSBAS_tools_lib as tools_lib
 import LiCSBAS_inv_lib as inv_lib
 import LiCSBAS_plot_lib as plot_lib
+import LiCSBAS_monitoring as monitoring_lib
 
 class Usage(Exception):
     """Usage context manager"""
@@ -202,6 +203,7 @@ def main(argv=None):
     compress = 'gzip'
     modelfile = ''
     nopngs = False
+    monitoring = False
 
     #%% Read options
     try:
@@ -209,7 +211,7 @@ def main(argv=None):
             opts, args = getopt.getopt(argv[1:], "ht:s:y:r:",
                            ["help", "demerr", "hgt_linear", "hgt_min=", "hgt_max=",
                             "nomask", "interpolate_nans", "nofilter", "n_para=", "range=", "range_geo=",
-                            "ex_range=", "ex_range_geo=", "gpu", "from_model=", "nopngs", "sbovl"])
+                            "ex_range=", "ex_range_geo=", "gpu", "from_model=", "nopngs", "sbovl", "monitoring"])
         except getopt.error as msg:
             raise Usage(msg)
         for o, a in opts:
@@ -257,6 +259,9 @@ def main(argv=None):
             elif o == '--from_model':
                 modelfile = a
                 inputresidflag = True
+            elif o == '--monitoring':
+                monitoring = True
+             
         if not tsadir:
             raise Usage('No tsa directory given, -t is not optional!')
         elif not os.path.isdir(tsadir):
@@ -284,7 +289,11 @@ def main(argv=None):
         print("\nFor help, use -h or --help.\n", file=sys.stderr)
         return 2
 
-
+    if monitoring:
+       print("Monitoring approach")
+       ifgdir = monitoring_lib.update_ifgdir12_16(ifgdir)
+       tsadir=("TS_"+ifgdir)
+     
     #%% Directory and file setting
     tsadir = os.path.abspath(tsadir)
     cumfile = os.path.join(tsadir, cumname)
