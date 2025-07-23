@@ -59,7 +59,7 @@ Outputs in TS_GEOCml*/ :
 Usage
 =====
 LiCSBAS13_sb_inv.py -d ifgdir [-t tsadir] [--inv_alg LS|WLS] [--mem_size float] [--gamma float] [--n_para int] [--n_unw_r_thre float] [--keep_incfile] [--gpu] [--singular] [--only_sb] [--nopngs] [--sbovl]
-                 [--no_storepatches] [--load_patches] [--nullify_noloops] [--offsets eqoffsets.txt] [-- monitoring]
+                 [--no_storepatches] [--load_patches] [--nullify_noloops] [--offsets eqoffsets.txt] [--monitoring]
 
  -d  Path to the GEOCml* dir containing stack of unw data
  -t  Path to the output TS_GEOCml* dir.
@@ -88,6 +88,7 @@ LiCSBAS13_sb_inv.py -d ifgdir [-t tsadir] [--inv_alg LS|WLS] [--mem_size float] 
  --offsets eqoffsets.txt  Estimate offsets read from external txt file - must have lines in the form of either yyyymmdd or yyyy-mm-dd
  --nullify_noloops   Nullifies data from ifgs not included in any loop BEFORE NULLIFICATION (if happened)
  --nullify_noloops_use_data_after_nullification  Just to test, will probably remove this
+ --monitoring For update and inverse only the last interferogramas with the new epcoh for monitoring volcano approach
 """
 '''
 skipping here as will do it as post-processing:
