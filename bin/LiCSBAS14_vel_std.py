@@ -85,12 +85,13 @@ def main(argv=None):
     cmap_noise_r = 'viridis_r'
     cumfile = False
     skipexisting = False
+    monitoring = False
     
     #%% Read options
     try:
         try:
             opts, args = getopt.getopt(argv[1:], "ht:i:",
-                                       ["help", "mem_size=", "gpu", "ransac", "skipexisting"])
+                                       ["help", "mem_size=", "gpu", "ransac", "skipexisting", "monitoring"])
         except getopt.error as msg:
             raise Usage(msg)
         for o, a in opts:
@@ -109,7 +110,8 @@ def main(argv=None):
                 ransac = True
             elif o == '--skipexisting':
                 skipexisting = True
-
+            elif o == '--monitoring':
+                monitoring = True
 
         if not tsadir:
             raise Usage('No tsa directory given, -d is not optional!')
@@ -126,6 +128,10 @@ def main(argv=None):
         return 2
 
 
+    if monitoring:
+       print("Monitoring approach")
+       ifgdir = monitoring_lib.update_ifgdir12_16(ifgdir)
+     
     #%% Directory settings
     tsadir = os.path.abspath(tsadir)
     resultsdir = os.path.join(tsadir,'results')
