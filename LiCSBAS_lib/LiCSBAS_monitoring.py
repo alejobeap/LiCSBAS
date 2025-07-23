@@ -22,7 +22,7 @@ def update_ifgdir(ifgdir):
 
     if not os.path.exists(cumfile):
         print("No hay archivo cum.h5 antiguo")
-        return ifgdir  # sin cambios
+        return os.path.basename(ifgdir)  # sin cambios
 
     print('\nLeyendo {}'.format(os.path.relpath(cumfile)))
     with h5.File(cumfile, 'r') as cumh5:
@@ -33,7 +33,7 @@ def update_ifgdir(ifgdir):
 
     if lastimdate is None:
         print("No hay fechas en cum.h5")
-        return ifgdir  # sin cambios
+        return os.path.basename(ifgdir)  # sin cambios
 
     # Buscar carpetas con fecha inicial mayor que lastimdate
     carpetas_mayores = []
@@ -74,6 +74,54 @@ def update_ifgdir(ifgdir):
                     os.symlink(full_path, dst)
                     print(f"Enlazado archivo suelto: {name}")
 
+        print(f"\nUsando carpeta actualizada: {os.path.basename(update_dir)}")
+        return os.path.basename(update_dir)
+
+    else:
+        print(f"No hay carpetas con fecha inicial mayor que {lastimdate}. Usando carpeta original.")
+        return os.path.basename(ifgdir)
+
+
+
+def update_ifgdir12_16(ifgdir):
+    ifgdir = os.path.abspath(ifgdir)
+    cumfile = os.path.join(os.path.dirname(ifgdir), 'TS_' + os.path.basename(ifgdir), 'cum.h5')
+
+    if not os.path.exists(cumfile):
+        print("No hay archivo cum.h5 antiguo")
+        return os.path.basename(ifgdir)  # sin cambios
+
+    #print('\nLeyendo {}'.format(os.path.relpath(cumfile)))
+    with h5.File(cumfile, 'r') as cumh5:
+        imdates = cumh5['imdates'][()].astype(str).tolist()
+    
+    lastimdate = imdates[-1] if imdates else None
+    #print("Última fecha en cum.h5:", lastimdate)
+
+    if lastimdate is None:
+        #print("No hay fechas en cum.h5")
+        return os.path.basename(ifgdir)  # sin cambios
+
+    # Buscar carpetas con fecha inicial mayor que lastimdate
+    carpetas_mayores = []
+    for name in os.listdir(ifgdir):
+        full_path = os.path.join(ifgdir, name)
+        if os.path.isdir(full_path):
+            try:
+                start, end = name.split('_')
+                if start > lastimdate:
+                    carpetas_mayores.append(name)
+            except ValueError:
+                continue
+
+    if carpetas_mayores:
+    #    print(f"Hay carpetas con fecha inicial mayor que {lastimdate}:")
+    #    for c in sorted(carpetas_mayores):
+    #        print(" -", c)
+
+        update_dir = ifgdir + "_update"
+        if not os.path.exists(update_dir):
+            os.makedirs(update_dir)
         print(f"\nUsando carpeta actualizada: {os.path.basename(update_dir)}")
         return os.path.basename(update_dir)
 
