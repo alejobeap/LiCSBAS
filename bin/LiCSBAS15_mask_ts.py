@@ -28,7 +28,7 @@ Usage
 LiCSBAS15_mask_ts.py -t tsadir [-c coh_thre] [-u n_unw_r_thre] [-v vstd_thre]
   [-T maxTlen_thre] [-g n_gap_thre] [-s stc_thre] [-i n_ifg_noloop_thre]
   [-l n_loop_err_thre] [-r resid_rms_thre] [--vmin float] [--vmax float]
-  [--keep_isolated] [--noautoadjust] [--avg_phase_bias float] [--n_gap_use_merged]
+  [--keep_isolated] [--noautoadjust] [--avg_phase_bias float] [--n_gap_use_merged] [--monitoring]
 
  -t  Path to the TS_GEOCml* dir.
  -c  Threshold of coh_avg (average coherence)
@@ -104,6 +104,7 @@ import numpy as np
 import cmcrameri.cm as cmc
 import LiCSBAS_io_lib as io_lib
 import LiCSBAS_plot_lib as plot_lib
+import LiCSBAS_monitoring as monitoring_lib
 
 import warnings
 import matplotlib
@@ -168,11 +169,12 @@ def main(argv=None):
     cmap_vel = cmc.roma.reversed()
     cmap_noise = 'viridis'
     cmap_noise_r = 'viridis_r'
+    monitoring =  False
     
     #%% Read options
     try:
         try:
-            opts, args = getopt.getopt(argv[1:], "ht:c:u:v:g:i:l:L:r:T:s:", ["version", "help", "vmin=", "vmax=", "avg_phase_bias=", "use_coh_freq", "keep_isolated", "noautoadjust","n_gap_use_merged","sbovl"])
+            opts, args = getopt.getopt(argv[1:], "ht:c:u:v:g:i:l:L:r:T:s:", ["version", "help", "vmin=", "vmax=", "avg_phase_bias=", "use_coh_freq", "keep_isolated", "noautoadjust","n_gap_use_merged","sbovl","monitoring"])
         except getopt.error as msg:
             raise Usage(msg)
         for o, a in opts:
@@ -219,6 +221,8 @@ def main(argv=None):
                 n_gap_use_merged = True
             elif o == '--sbovl':
                 sbovl = True
+            elif o == '--monitoring':
+                monitoring = True
 
         if not tsadir:
             raise Usage('No tsa directory given, -t is not optional!')
@@ -233,7 +237,11 @@ def main(argv=None):
         print("\nFor help, use -h or --help.\n", file=sys.stderr)
         return 2
  
-
+    if monitoring:
+       print("Monitoring approach")
+       ifgdir = monitoring_lib.update_ifgdir12_16(ifgdir)
+       tsadir=("TS_"+ifgdir)
+     
     #%% Directory and file setting and get info
     tsadir = os.path.abspath(tsadir)
     resultsdir = os.path.join(tsadir,'results')
