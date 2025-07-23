@@ -291,6 +291,7 @@ def main(argv=None):
 
     if monitoring:
        print("Monitoring approach")
+       ifgdir = tsadir[3:]
        ifgdir = monitoring_lib.update_ifgdir12_16(ifgdir)
        tsadir=("TS_"+ifgdir)
      
