@@ -182,7 +182,8 @@ def main(argv=None):
     print("unw_cov_thre : {}".format(unw_cov_thre), flush=True)
 
     if monitoring:
-       ifgdir = update_ifgdir(ifgdir)
+       print("Monitoring approach")
+       #ifgdir = update_ifgdir(ifgdir)
 
     #%% Directory setting
     ifgdir = os.path.abspath(ifgdir)
