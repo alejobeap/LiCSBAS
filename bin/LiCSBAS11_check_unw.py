@@ -181,8 +181,8 @@ def main(argv=None):
     print("\ncoh_thre     : {}".format(coh_thre), flush=True)
     print("unw_cov_thre : {}".format(unw_cov_thre), flush=True)
 
-
- 
+    if monitoring:
+       ifgdir = update_ifgdir(ifgdir)
 
     #%% Directory setting
     ifgdir = os.path.abspath(ifgdir)
