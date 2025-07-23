@@ -128,10 +128,12 @@ def main(argv=None):
         print("\nFor help, use -h or --help.\n", file=sys.stderr)
         return 2
 
-
     if monitoring:
        print("Monitoring approach")
+       ifgdir = tsadir[3:]
        ifgdir = monitoring_lib.update_ifgdir12_16(ifgdir)
+       tsadir=("TS_"+ifgdir)
+     
      
     #%% Directory settings
     tsadir = os.path.abspath(tsadir)
