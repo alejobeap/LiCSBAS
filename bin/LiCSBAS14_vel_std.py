@@ -58,6 +58,7 @@ import LiCSBAS_io_lib as io_lib
 import LiCSBAS_inv_lib as inv_lib
 import LiCSBAS_tools_lib as tools_lib
 import LiCSBAS_plot_lib as plot_lib
+import LiCSBAS_monitoring as monitoring_lib
 
 class Usage(Exception):
     """Usage context manager"""
