@@ -74,6 +74,7 @@ LiCSBAS12_loop_closure.py -d ifgdir [-t tsadir] [-l loop_thre] [--multi_prime]
  --nullify_skip_backup  Do not save original ifgs (before nullification) - by default: save them. Note, skipping this backup would affect no-loop-ifg number (step 13)
  --nullify_threshold Threshold to detect phase loop closure errors (Default: pi) [rad]
  --treat_as_bad When nullifying, nullify unless ALL loops are GOOD (default: Only nullify if ALL loops are bad)
+ --monitoring For update and inverse only the last interferogramas with the new epcoh for monitoring volcano approach
 """
 # %% Change log
 '''
