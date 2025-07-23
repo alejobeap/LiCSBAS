@@ -83,6 +83,9 @@ def update_ifgdir(ifgdir):
 
 
 
+import os
+import h5py as h5
+
 def update_ifgdir12_16(ifgdir):
     ifgdir = os.path.abspath(ifgdir)
     cumfile = os.path.join(os.path.dirname(ifgdir), 'TS_' + os.path.basename(ifgdir), 'cum.h5')
@@ -91,18 +94,15 @@ def update_ifgdir12_16(ifgdir):
         print("No hay archivo cum.h5 antiguo")
         return os.path.basename(ifgdir)  # sin cambios
 
-    #print('\nLeyendo {}'.format(os.path.relpath(cumfile)))
     with h5.File(cumfile, 'r') as cumh5:
         imdates = cumh5['imdates'][()].astype(str).tolist()
-    
+
     lastimdate = imdates[-1] if imdates else None
-    #print("Última fecha en cum.h5:", lastimdate)
 
     if lastimdate is None:
-        #print("No hay fechas en cum.h5")
         return os.path.basename(ifgdir)  # sin cambios
 
-    # Buscar carpetas con fecha inicial mayor que lastimdate
+    # Verificar si hay carpetas más recientes
     carpetas_mayores = []
     for name in os.listdir(ifgdir):
         full_path = os.path.join(ifgdir, name)
@@ -115,18 +115,11 @@ def update_ifgdir12_16(ifgdir):
                 continue
 
     if carpetas_mayores:
-    #    print(f"Hay carpetas con fecha inicial mayor que {lastimdate}:")
-    #    for c in sorted(carpetas_mayores):
-    #        print(" -", c)
-
         update_dir = ifgdir + "_update"
-        if not os.path.exists(update_dir):
-            os.makedirs(update_dir)
-        print(f"\nUsando carpeta actualizada: {os.path.basename(update_dir)}")
+        print(f"Se detectaron carpetas más recientes. Se sugiere usar: {os.path.basename(update_dir)}")
         return os.path.basename(update_dir)
-
     else:
-        print(f"No hay carpetas con fecha inicial mayor que {lastimdate}. Usando carpeta original.")
+        print(f"No hay carpetas con fecha inicial mayor que {lastimdate}. Se usa la original.")
         return os.path.basename(ifgdir)
 
 
