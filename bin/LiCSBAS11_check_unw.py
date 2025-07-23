@@ -96,6 +96,7 @@ import datetime as dt
 import LiCSBAS_io_lib as io_lib
 import LiCSBAS_tools_lib as tools_lib
 import LiCSBAS_plot_lib as plot_lib
+import LiCSBAS_monitoring as monitoring_lib
 from scipy import stats
 
 class Usage(Exception):
@@ -183,7 +184,7 @@ def main(argv=None):
 
     if monitoring:
        print("Monitoring approach")
-       #ifgdir = update_ifgdir(ifgdir)
+       ifgdir = monitoring_lib.update_ifgdir(ifgdir)
 
     #%% Directory setting
     ifgdir = os.path.abspath(ifgdir)
