@@ -133,6 +133,7 @@ import LiCSBAS_loop_lib as loop_lib
 import LiCSBAS_tools_lib as tools_lib
 import LiCSBAS_inv_lib as inv_lib
 import LiCSBAS_plot_lib as plot_lib
+import LiCSBAS_monitoring as monitoring_lib
 import xarray as xr
 import cmcrameri.cm as cmc
 
@@ -171,6 +172,7 @@ def main(argv=None):
     save_ori_unw = True
     nullify_threshold = np.pi
     treat_as_bad = False
+    monitoring = False
 
     try:
         n_para = len(os.sched_getaffinity(0))
@@ -187,7 +189,7 @@ def main(argv=None):
         try:
             opts, args = getopt.getopt(argv[1:], "hd:t:l:",
                                        ["help", "multi_prime", "nullify", "skip_pngs", "nopngs", "treat_as_bad",
-                                        "rm_ifg_list=", "n_para=", "ref_approx=", "nullify_skip_backup", "nullify_threshold="])
+                                        "rm_ifg_list=", "n_para=", "ref_approx=", "nullify_skip_backup", "nullify_threshold=", "monitoring"])
         except getopt.error as msg:
             raise Usage(msg)
         for o, a in opts:
@@ -218,6 +220,8 @@ def main(argv=None):
                 nullify_threshold = a
             elif o == '--treat_as_bad':
                 treat_as_bad = True
+            elif o == '--monitoring':
+                monitoring = True
         if not nullify: # debug
             save_ori_unw = False
         if not ifgdir:
@@ -237,6 +241,10 @@ def main(argv=None):
 
     print("\nloop_thre : {} rad".format(loop_thre), flush=True)
 
+ 
+    if monitoring:
+       print("Monitoring approach")
+       ifgdir = monitoring_lib.update_ifgdir12_16(ifgdir)
     # %% Directory setting
     ifgdir = os.path.abspath(ifgdir)
 
