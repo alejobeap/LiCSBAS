@@ -77,6 +77,7 @@ p11_unw_thre=""	# default: 0.3
 p11_coh_thre=""	# default: 0.05
 p11_s_param="n" # y/n
 p11_sbovl="n"
+p11_updatemonitoring="" #y/n default n
 p120_use="n"  # y/n
 p120_sbovl="n"
 p12_loop_thre=""	# default: 1.5 rad. With --nullify, recommended higher value (as this is an average over the whole scene)
@@ -388,8 +389,21 @@ fi
 
 done ##1
 
+
+if [ "$p11_updatemonitoring" == "y" ]; then
+  GEOCmldir=$(python3 -c "
+import sys
+from LiCSBAS_monitoring import update_ifgdir
+import os
+final_path = update_ifgdir('$GEOCmldir')
+print(os.path.basename(final_path))
+")
+  echo "GEOCmldir actualizado: $GEOCmldir"
+fi
+
 ### Determine name of TSdir
 TSdir="TS_$GEOCmldir"
+
 
 
 if [ $start_step -le 11 -a $end_step -ge 11 ];then
@@ -402,6 +416,7 @@ if [ $start_step -le 11 -a $end_step -ge 11 ];then
   if [ ! -z $p11_minbtemp ];then p11_op="$p11_op --minbtemp $p11_minbtemp"; fi
   if [ ! -z $p11_maxbtemp ];then p11_op="$p11_op --minbtemp $p11_maxbtemp"; fi
   if [ $p11_sbovl == "y" ];then p11_op="$p11_op --sbovl"; fi
+  if [ $p11_updatemonitoring == "y" ];then p11_op="$p11_op --monitoring"; fi
   if [ $p11_s_param == "y" ];then p11_op="$p11_op -s"; fi
   if [ $check_only == "y" ];then
     echo "LiCSBAS11_check_unw.py $p11_op"
