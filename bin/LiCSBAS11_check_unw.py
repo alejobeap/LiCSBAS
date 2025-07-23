@@ -126,6 +126,7 @@ def main(argv=None):
     maxbtemp = 0 # 0 means not use
     sbovl = False
     skipdatesfile = []
+    monitoring = False
 
     #%% Read options
     try:
@@ -155,6 +156,8 @@ def main(argv=None):
                 sbovl = True
             elif o == '--skip_dates':
                 skipdatesfile = a
+            elif o == '--monitoring':
+                monitoring = True
 
         
         if not ifgdir:
@@ -178,6 +181,8 @@ def main(argv=None):
     print("\ncoh_thre     : {}".format(coh_thre), flush=True)
     print("unw_cov_thre : {}".format(unw_cov_thre), flush=True)
 
+
+ 
 
     #%% Directory setting
     ifgdir = os.path.abspath(ifgdir)
