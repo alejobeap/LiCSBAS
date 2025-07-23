@@ -46,10 +46,13 @@ LiCSBAS11_check_unw.py -d ifgdir [-t tsadir] [-c coh_thre] [-u unw_thre] [--maxb
  -s  Check for coregistration error in the form of a significant azimuthal ramp
  --sbovl only applying step 11 for sbovl
  --skip_dates dates.txt  Will skip interferograms covering given dates (in the form of either yyyymmdd or yyyy-mm-dd inside the txt file)
+ --monitoring For update and inverse only the last interferogramas with the new epcoh for monitoring volcano approach
 
 """
 #%% Change log
 '''
+20250723 P. Espin-Bedon University of Leeds
+add --monitoring only to invert the last interferogramas and update the old version
 20250109 ML
  - add option to ignore ifgs covering given epoch
 20241030 M Nergizci
