@@ -86,7 +86,7 @@ def main():
     tsadir_update = f"{tsadir}_update"
 
     oldfile = os.path.join(tsadir, "cum.h5")
-    newfile = os.path.join(tsadir_update, "cum.h5")
+    newfile = os.path.join(tsadir, "cum.h5")
     updatefile = os.path.join(tsadir, "cum_update.h5")
 
     if not os.path.exists(oldfile):
