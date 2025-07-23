@@ -59,7 +59,7 @@ Outputs in TS_GEOCml*/ :
 Usage
 =====
 LiCSBAS13_sb_inv.py -d ifgdir [-t tsadir] [--inv_alg LS|WLS] [--mem_size float] [--gamma float] [--n_para int] [--n_unw_r_thre float] [--keep_incfile] [--gpu] [--singular] [--only_sb] [--nopngs] [--sbovl]
-                 [--no_storepatches] [--load_patches] [--nullify_noloops] [--offsets eqoffsets.txt]
+                 [--no_storepatches] [--load_patches] [--nullify_noloops] [--offsets eqoffsets.txt] [-- monitoring]
 
  -d  Path to the GEOCml* dir containing stack of unw data
  -t  Path to the output TS_GEOCml* dir.
@@ -219,6 +219,7 @@ def main(argv=None):
     nullify_noloops_use_data_after_nullification = False
     #print('NOTE, variable nullify_noloops_use_data_after_nullification set to False - testing')
     sbovl = False
+    monitoring = False
     
     try:
         n_para = len(os.sched_getaffinity(0))
@@ -252,7 +253,7 @@ def main(argv=None):
                                        ["help",  "mem_size=", "input_units=", "gamma=",
                                         "n_unw_r_thre=", "keep_incfile", "nopngs", "nullify_noloops", "nullify_noloops_use_data_after_nullification",
                                         "inv_alg=", "n_para=", "gpu", "singular", "singular_gauss","only_sb", "no_storepatches", "load_patches",
-                                        "offsets=", "sbovl"])
+                                        "offsets=", "sbovl", "monitoring"])
                                       #  "step_events="])
         except getopt.error as msg:
             raise Usage(msg)
@@ -305,7 +306,8 @@ def main(argv=None):
             elif o == '--offsets':
                 offsetsfile = a
                 offsetsflag = True
-	      
+            elif o == '--monitoring':
+                monitoring = True  
 
         if not ifgdir:
             raise Usage('No data directory given, -d is not optional!')
@@ -354,7 +356,9 @@ def main(argv=None):
         print("\nFor help, use -h or --help.\n", file=sys.stderr)
         return 2
 
-
+    if monitoring:
+       print("Monitoring approach")
+       ifgdir = monitoring_lib.update_ifgdir12_16(ifgdir)
     #%% Directory settings
     ifgdir = os.path.abspath(ifgdir)
 
