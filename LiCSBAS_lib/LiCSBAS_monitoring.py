@@ -74,12 +74,12 @@ def update_ifgdir(ifgdir):
                     os.symlink(full_path, dst)
                     print(f"Enlazado archivo suelto: {name}")
 
-        print(f"\nUsando carpeta actualizada: {update_dir}")
-        return update_dir
+        print(f"\nUsando carpeta actualizada: {os.path.basename(update_dir)}")
+        return os.path.basename(update_dir)
 
     else:
         print(f"No hay carpetas con fecha inicial mayor que {lastimdate}. Usando carpeta original.")
-        return ifgdir
+        return os.path.basename(ifgdir)
 
 
 # Uso:
