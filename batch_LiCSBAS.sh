@@ -390,17 +390,6 @@ fi
 done ##1
 
 
-if [ "$p11_updatemonitoring" == "y" ]; then
-  GEOCmldir=$(python3 -c "
-import sys
-from LiCSBAS_monitoring import update_ifgdir
-import os
-final_path = update_ifgdir('$GEOCmldir')
-print(os.path.basename(final_path))
-")
-  echo "GEOCmldir actualizado: $GEOCmldir"
-fi
-
 ### Determine name of TSdir
 TSdir="TS_$GEOCmldir"
 
@@ -458,6 +447,7 @@ if [ $start_step -le 12 -a $end_step -ge 12 ];then
       if [ ! -z $p12_loop_thre ];then p12_op="$p12_op -l $p12_loop_thre"; fi
       if [ $p12_multi_prime == "y" ];then p12_op="$p12_op --multi_prime"; fi
       if [ $p12_nullify == "y" ];then p12_op="$p12_op --nullify"; fi
+      if [ $p11_updatemonitoring == "y" ];then p12_op="$p12_op --monitoring"; fi
       if [ $p12_skippngs == "y" ];then p12_op="$p12_op --nopngs"; fi
       if [ ! -z $p12_rm_ifg_list ];then p12_op="$p12_op --rm_ifg_list $p12_rm_ifg_list"; fi
       if [ ! -z $p12_n_para ];then p12_op="$p12_op --n_para $p12_n_para";
@@ -514,6 +504,7 @@ if [ $start_step -le 13 -a $end_step -ge 13 ];then
     elif [ ! -z "$n_para" ];then p13_op="$p13_op --n_para $n_para"; fi
   if [ ! -z "$p13_n_unw_r_thre" ];then p13_op="$p13_op --n_unw_r_thre $p13_n_unw_r_thre"; fi
   if [ "$p13_keep_incfile" == "y" ];then p13_op="$p13_op --keep_incfile"; fi
+  if [ $p11_updatemonitoring == "y" ];then p13_op="$p13_op --monitoring"; fi
   if [ "$p13_nullify_noloops" == "y" ];then p13_op="$p13_op --nullify_noloops"; fi
   if [ "$p13_singular" == "y" ];then p13_op="$p13_op --singular"; fi
   if [ "$p13_sbovl" == "y" ];then p13_op="$p13_op --sbovl"; fi
@@ -559,6 +550,7 @@ if [ $start_step -le 14 -a $end_step -ge 14 ];then
     else p14_op="$p14_op -t $TSdir"; fi
   if [ ! -z $p14_mem_size ];then p14_op="$p14_op --mem_size $p14_mem_size"; fi
   if [ $gpu == "y" ];then p14_op="$p14_op --gpu"; fi
+  if [ $p11_updatemonitoring == "y" ];then p14_op="$p14_op --monitoring"; fi
   if [ "$eqoffs" == "y" ]; then
     # we then do not want to regenerate vstd
     extra='--skipexisting'
@@ -591,6 +583,7 @@ if [ $start_step -le 15 -a $end_step -ge 15 ];then
   if [ ! -z "$p15_vmin" ];then p15_op="$p15_op --vmin $p15_vmin"; fi
   if [ ! -z "$p15_vmax" ];then p15_op="$p15_op --vmax $p15_vmax"; fi
   if [ "$p15_keep_isolated" == "y" ];then p15_op="$p15_op --keep_isolated"; fi
+  if [ $p11_updatemonitoring == "y" ];then p15_op="$p15_op --monitoring"; fi
   if [ "$p15_noautoadjust" == "y" ];then p15_op="$p15_op --noautoadjust"; fi
   if [ "$p15_sbovl" == "y" ];then p15_op="$p15_op --sbovl"; fi
   if [ "$p15_n_gap_use_merged" == "y" ];then p15_op="$p15_op --n_gap_use_merged"; fi
@@ -611,6 +604,7 @@ if [ $start_step -le 16 -a $end_step -ge 16 ];then
   if [ ! -z "$p16_filtwidth_yr" ];then p16_op="$p16_op -y $p16_filtwidth_yr"; fi
   if [ ! -z "$p16_deg_deramp" ];then p16_op="$p16_op -r $p16_deg_deramp"; fi
   if [ "$p16_demerr" == "y" ];then p16_op="$p16_op --demerr"; fi
+  if [ $p11_updatemonitoring == "y" ];then p16_op="$p16_op --monitoring"; fi
   if [ "$p16_hgt_linear" == "y" ];then p16_op="$p16_op --hgt_linear"; fi
   if [ ! -z "$p16_hgt_min" ];then p16_op="$p16_op --hgt_min $p16_hgt_min"; fi
   if [ ! -z "$p16_hgt_max" ];then p16_op="$p16_op --hgt_max $p16_hgt_max"; fi
