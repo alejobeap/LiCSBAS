@@ -81,10 +81,10 @@ def main():
 
     ifgdir = tsadir.replace("TS_", "")
     ifgdir = monitoring_lib.update_ifgdir12_16(ifgdir)
-    ifgdir = tsadir.replace("TS_", "")
-    ifgdir_old = tsadir.replace("_update", "")
+    ifgdir = ifgdir.replace("_update", "")
     tsadir = f"TS_{ifgdir}"
     tsadir_update = f"{tsadir}_update"
+
 
     oldfile = os.path.join(tsadir, "cum.h5")
     print("Old file:",oldfile)
