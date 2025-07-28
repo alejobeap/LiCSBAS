@@ -22,7 +22,7 @@
 ### Settings ####
 #################
 start_step="01"	# 01-05, 11-16
-end_step="16"	# 01-05, 11-16
+end_step="16"	# 01-05, 11-16  # 17 monitoring option
 
 cometdev='0' # shortcut to use COMET's experimental/dev functions. At this moment, '1' will turn on the nullification. Recommended: 0
 # sbovl='n' # if 'y', LiCSBAS will apply on sbovls  ## TODO
@@ -632,6 +632,19 @@ if [ $start_step -le 16 -a $end_step -ge 16 ];then
     if [ ${PIPESTATUS[0]} -ne 0 ];then exit 1; fi
   fi
 fi
+
+if [ $start_step -le 17 -a $end_step -ge 17 ];then
+  p17_op=""
+    if [ ! -z "$p17_TSdir" ];then p17_op="$p17_op -t $p17_TSdir";
+    else p17_op="$p17_op -t $TSdir"; fi
+      if [ "$check_only" == "y" ];then
+    echo "LiCSBAS17_filt_ts.py $extra $p17_op"
+  else
+    LiCSBAS16_filt_ts.py $extra $p16_op 2>&1 | tee -a $log
+    if [ ${PIPESTATUS[0]} -ne 0 ];then exit 1; fi
+  fi
+fi
+    
 
 if [ $check_only == "y" ];then
   echo ""
