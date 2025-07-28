@@ -248,6 +248,7 @@ def main(argv=None):
     #step_events = False
     offsetsflag = False
     offsets_dt = []
+    monitoring = False
     #%% Read options
     try:
         try:
