@@ -28,7 +28,7 @@ def update_ifgdir(ifgdir):
     with h5.File(cumfile, 'r') as cumh5:
         imdates = cumh5['imdates'][()].astype(str).tolist()
     
-    lastimdate = imdates[-] if imdates else None
+    lastimdate = imdates[-1] if imdates else None
     print("Última fecha en cum.h5:", lastimdate)
 
     if lastimdate is None:
