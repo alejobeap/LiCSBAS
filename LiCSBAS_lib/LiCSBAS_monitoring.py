@@ -16,6 +16,7 @@ Changelog
 import os
 import h5py as h5
 
+
 def update_ifgdir(ifgdir):
     ifgdir = os.path.abspath(ifgdir)
     ts_dir = os.path.join(os.path.dirname(ifgdir), 'TS_' + os.path.basename(ifgdir))
@@ -35,7 +36,7 @@ def update_ifgdir(ifgdir):
 
     last_dates = imdates[-4:]  # Last 4 dates
     lastimdate = imdates[-1]
-    print("Última fecha en cum.h5:", lastimdate)
+    print("Last date in cum.h5:", lastimdate)
 
     # Buscar carpetas con fecha inicial mayor que lastimdate3
     newer_folders = []
@@ -50,10 +51,10 @@ def update_ifgdir(ifgdir):
                 continue
 
     if not newer_folders:
-        print(f"No hay carpetas con fecha inicial mayor que {last_dates[0]}. Usando carpeta original.")
+        print(f"There are no folders with a start date greater than {last_dates[0]}. Using original folder.")
         return os.path.basename(ifgdir)
 
-    print(f"Hay carpetas con fecha inicial mayor que {lastimdate}:")
+    print(f"There are folders with an initial date greater than {lastimdate}:")
     for folder in sorted(newer_folders):
         print(" -", folder)
 
@@ -66,7 +67,7 @@ def update_ifgdir(ifgdir):
     # Enlazar archivos sueltos
     link_loose_files(ifgdir, update_dir)
 
-    print(f"\nUsando carpeta actualizada: {os.path.basename(update_dir)}")
+    print(f"\nUsing update folder: {os.path.basename(update_dir)}")
     return os.path.basename(update_dir)
 
 
@@ -92,15 +93,15 @@ def link_loose_files(src_dir, dst_dir):
             print(f"Enlazado archivo suelto: {name}")
 
 
-import os
-import h5py as h5
+#### For steps 12-16 Only to check 
+
 
 def update_ifgdir12_16(ifgdir):
     ifgdir = os.path.abspath(ifgdir)
     cumfile = os.path.join(os.path.dirname(ifgdir), 'TS_' + os.path.basename(ifgdir), 'cum.h5')
 
     if not os.path.exists(cumfile):
-        print("No hay archivo cum.h5 antiguo")
+        print("There aren't old cum.h5 file")
         return os.path.basename(ifgdir)  # sin cambios
 
     with h5.File(cumfile, 'r') as cumh5:
@@ -125,10 +126,10 @@ def update_ifgdir12_16(ifgdir):
 
     if carpetas_mayores:
         update_dir = ifgdir + "_update"
-        print(f"Se detectaron carpetas más recientes. Se sugiere usar: {os.path.basename(update_dir)}")
+        print(f"More recent folders were detected. We suggest using: {os.path.basename(update_dir)}")
         return os.path.basename(update_dir)
     else:
-        print(f"No hay carpetas con fecha inicial mayor que {lastimdate}. Se usa la original.")
+        print(f"There are no folders with a start date greater than {lastimdate}. Using original folder.")
         return os.path.basename(ifgdir)
 
 
