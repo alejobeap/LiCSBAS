@@ -81,13 +81,17 @@ def main():
 
     ifgdir = tsadir.replace("TS_", "")
     ifgdir = monitoring_lib.update_ifgdir12_16(ifgdir)
-
+    ifgdir = tsadir.replace("TS_", "")
+    ifgdir_old = tsadir.replace("_update", "")
     tsadir = f"TS_{ifgdir}"
     tsadir_update = f"{tsadir}_update"
 
     oldfile = os.path.join(tsadir, "cum.h5")
-    newfile = os.path.join(tsadir, "cum.h5")
+    print("Old file:",oldfile)
+    newfile = os.path.join(tsadir_update, "cum.h5")
+    print("New file:",newfile)
     updatefile = os.path.join(tsadir, "cum_update.h5")
+    print("Update file:",updatefile)
 
     if not os.path.exists(oldfile):
         print(f"Old file not found: {oldfile}")
