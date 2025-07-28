@@ -167,7 +167,7 @@ p15_noautoadjust="n" # y/n. default: n
 p16_TSdir=""    # default: TS_$GEOCmldir
 p16_nomask="n"	# y/n. default: n
 p16_n_para=$n_para   # default: # of usable CPU
-
+p17_TSdir=""    # default: TS_$GEOCmldir but use the TS_$GEOCmldir_update to combine
 
 # eqoffs
 eqoffs_minmag="0"  # min magnitude of earthquakes to auto-find. 0 means skipping the estimation.
