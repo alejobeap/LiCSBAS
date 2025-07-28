@@ -638,9 +638,9 @@ if [ $start_step -le 17 -a $end_step -ge 17 ];then
     if [ ! -z "$p17_TSdir" ];then p17_op="$p17_op -t $p17_TSdir";
     else p17_op="$p17_op -t $TSdir"; fi
       if [ "$check_only" == "y" ];then
-    echo "LiCSBAS17_combine_monitoring.py $extra $p17_op"
+    echo "LiCSBAS17_combine_monitoring.py $p17_op"
   else
-    LiCSBAS17_combine_monitoring.py $extra $p17_op 2>&1 | tee -a $log
+    LiCSBAS17_combine_monitoring.py $p17_op 2>&1 | tee -a $log
     if [ ${PIPESTATUS[0]} -ne 0 ];then exit 1; fi
   fi
 fi
