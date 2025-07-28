@@ -33,7 +33,7 @@ def update_ifgdir(ifgdir):
         print("No hay fechas en cum.h5")
         return os.path.basename(ifgdir)
 
-    last_dates = imdates[-3:]  # Last 3 dates
+    last_dates = imdates[-4:]  # Last 4 dates
     lastimdate = imdates[-1]
     print("Última fecha en cum.h5:", lastimdate)
 
