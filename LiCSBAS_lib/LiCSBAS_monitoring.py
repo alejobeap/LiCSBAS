@@ -35,14 +35,17 @@ def update_ifgdir(ifgdir):
         print("No hay fechas en cum.h5")
         return os.path.basename(ifgdir)  # sin cambios
 
+    # For copy the last 3 epcoh interferograms 
+    lastimdate3 = imdates[-3]
     # Buscar carpetas con fecha inicial mayor que lastimdate
+    
     carpetas_mayores = []
     for name in os.listdir(ifgdir):
         full_path = os.path.join(ifgdir, name)
         if os.path.isdir(full_path):
             try:
                 start, end = name.split('_')
-                if start > lastimdate:
+                if start > lastimdate3:
                     carpetas_mayores.append(name)
             except ValueError:
                 continue
