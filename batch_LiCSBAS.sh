@@ -14,7 +14,8 @@
 #  14: LiCSBAS14_vel_std.py
 #  15: LiCSBAS15_mask_ts.py
 #  16: LiCSBAS16_filt_ts.py
-
+#  Optional
+#  17: LiCSBAS17_combine_monitoring.py - To monitoring approach for volcanoes
 #
 # Status of COMET dev version - the experimental functions are turned on with 
 #
