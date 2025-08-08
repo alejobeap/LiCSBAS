@@ -88,6 +88,7 @@ def main():
     bad_ifg12no = io_lib.read_ifg_list(os.path.join(infodir, "12no_loop_ifg.txt"))
 
     bad_ifg_all = sorted(set(bad_ifg11 + bad_ifg12 + bad_ifg12no))
+    all_ifg=sorted(set(all_ifg+all_ifg))
 
     # Remove bad IFGs
     ifgdates_all = io_lib.read_ifg_list(all_ifg)
