@@ -59,7 +59,7 @@ Outputs in TS_GEOCml*/ :
 Usage
 =====
 LiCSBAS13_sb_inv.py -d ifgdir [-t tsadir] [--inv_alg LS|WLS] [--mem_size float] [--gamma float] [--n_para int] [--n_unw_r_thre float] [--keep_incfile] [--gpu] [--singular] [--only_sb] [--nopngs] [--sbovl]
-                 [--no_storepatches] [--load_patches] [--nullify_noloops] [--offsets eqoffsets.txt] [--monitoring]
+                 [--no_storepatches] [--load_patches] [--nullify_noloops] [--offsets eqoffsets.txt] [--monitoring] [--badnoloops]
 
  -d  Path to the GEOCml* dir containing stack of unw data
  -t  Path to the output TS_GEOCml* dir.
@@ -88,6 +88,7 @@ LiCSBAS13_sb_inv.py -d ifgdir [-t tsadir] [--inv_alg LS|WLS] [--mem_size float] 
  --offsets eqoffsets.txt  Estimate offsets read from external txt file - must have lines in the form of either yyyymmdd or yyyy-mm-dd
  --nullify_noloops   Nullifies data from ifgs not included in any loop BEFORE NULLIFICATION (if happened)
  --nullify_noloops_use_data_after_nullification  Just to test, will probably remove this
+ --badnoloops add to bad IFS the IFS in no loops 
  --monitoring For update and inverse only the last interferogramas with the new epcoh for monitoring volcano approach
 """
 '''
@@ -222,6 +223,7 @@ def main(argv=None):
     #print('NOTE, variable nullify_noloops_use_data_after_nullification set to False - testing')
     sbovl = False
     monitoring = False
+	badnoloops = False
     
     try:
         n_para = len(os.sched_getaffinity(0))
@@ -256,7 +258,7 @@ def main(argv=None):
                                        ["help",  "mem_size=", "input_units=", "gamma=",
                                         "n_unw_r_thre=", "keep_incfile", "nopngs", "nullify_noloops", "nullify_noloops_use_data_after_nullification",
                                         "inv_alg=", "n_para=", "gpu", "singular", "singular_gauss","only_sb", "no_storepatches", "load_patches",
-                                        "offsets=", "sbovl", "monitoring"])
+                                        "offsets=", "sbovl", "monitoring", "badnoloops"])
                                       #  "step_events="])
         except getopt.error as msg:
             raise Usage(msg)
@@ -311,6 +313,8 @@ def main(argv=None):
                 offsetsflag = True
             elif o == '--monitoring':
                 monitoring = True  
+		    elif o == '--badnoloops':
+                badnoloops = True 
 
         if not ifgdir:
             raise Usage('No data directory given, -d is not optional!')
@@ -381,7 +385,7 @@ def main(argv=None):
     bad_ifg12file = os.path.join(infodir, '12bad_ifg.txt')
     bad_ifg120file = os.path.join(infodir, '120bad_ifg.txt')
 
-    #### file no loop step 12
+    #### file no loop step 1
     bad_ifg12fileno = os.path.join(infodir, '12no_loop_ifg.txt') ## no loop ifs
 
     # if ref point selected using LiCSBAS120:
@@ -513,11 +517,11 @@ def main(argv=None):
 
     ###add also no loop file error PE
     print('adding also ifgs listed as no loop from file in info/12no_loop_ifg.txt')
-
-    bad_ifg12no = io_lib.read_ifg_list(bad_ifg12fileno) ## no loop file
-    bad_ifg_all = list(set(bad_ifg11+bad_ifg12+bad_ifg12no))
-        
-    #bad_ifg_all = list(set(bad_ifg11+bad_ifg12))
+    if badnoloops:
+	   bad_ifg12no = io_lib.read_ifg_list(bad_ifg12fileno) ## no loop file
+       bad_ifg_all = list(set(bad_ifg11+bad_ifg12+bad_ifg12no))
+	else:
+       bad_ifg_all = list(set(bad_ifg11+bad_ifg12))
     # removing coseismic ifgs for standard solutions. this will cause gap that will get interpolated
     # not needed/wanted for 'only_sb' and 'singular_gauss' methods
     if offsetsflag and (not singular_gauss) and (not only_sb):
