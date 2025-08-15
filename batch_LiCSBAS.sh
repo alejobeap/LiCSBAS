@@ -90,6 +90,7 @@ p13_singular="" # y/n. n by default
 p13_singular_gauss="" # y/n. n by default
 p13_skippngs="" # y/n. n by default
 p13_sbovl="n"
+p13_badnoloops="n" #For add bad IFS the noloops
 p15_coh_thre=""	# default: 0.05
 p15_n_unw_r_thre=""	# default: 1.5
 p15_vstd_thre=""	# default: 100 mm/yr
@@ -510,6 +511,7 @@ if [ $start_step -le 13 -a $end_step -ge 13 ];then
   if [ "$p13_sbovl" == "y" ];then p13_op="$p13_op --sbovl"; fi
   if [ "$p13_singular_gauss" == "y" ];then p13_op="$p13_op --singular_gauss"; fi
   if [ "$p13_skippngs" == "y" ];then p13_op="$p13_op --nopngs"; fi
+  if [ "$p13_badnoloops" == "y" ];then p13_op="$p13_op --badnoloops"; fi
   if [ "$gpu" == "y" ];then p13_op="$p13_op --gpu"; fi
 
   if [ "$cometdev" -eq 1 ];then
