@@ -386,7 +386,8 @@ def main(argv=None):
     bad_ifg120file = os.path.join(infodir, '120bad_ifg.txt')
 
     #### file no loop step 1
-    bad_ifg12fileno = os.path.join(infodir, '12no_loop_ifg.txt') ## no loop ifs
+    if badnoloops:
+       bad_ifg12fileno = os.path.join(infodir, '12no_loop_ifg.txt') ## no loop ifs
 
     # if ref point selected using LiCSBAS120:
     reffile = os.path.join(infodir, '120ref.txt')
