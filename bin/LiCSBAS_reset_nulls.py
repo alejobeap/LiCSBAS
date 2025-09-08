@@ -22,7 +22,7 @@ LiCSBAS_reset_nulls.py [-h] [-d GEOC_DIR] [--reset_all] [--reset_NoLoop] [--rese
 #%% Change log
 '''
 20250908 P.Espin
-Update and Change the name to unw.ori 
+Update and Change the name to unw.ori and also the pngs
 
 v1.0 20230803 Jack McGrath
  - Original implementation
