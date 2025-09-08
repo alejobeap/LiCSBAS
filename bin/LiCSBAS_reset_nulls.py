@@ -11,7 +11,7 @@ Input & output files
 
 Inputs in GEOCml*/ :
  - yyyymmdd_yyyymmdd/
-   - yyyymmdd_yyyymmdd_orig*.unw
+   - yyyymmdd_yyyymmdd.unw.ori
    - yyyymmdd_yyyymmdd.unw
 
 =====
@@ -21,6 +21,9 @@ LiCSBAS_reset_nulls.py [-h] [-d GEOC_DIR] [--reset_all] [--reset_NoLoop] [--rese
 """
 #%% Change log
 '''
+20250908 P.Espin
+Update and Change the name to unw.ori 
+
 v1.0 20230803 Jack McGrath
  - Original implementation
  
