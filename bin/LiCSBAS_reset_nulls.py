@@ -157,9 +157,9 @@ def reset_null():
 
     for ifg in ifglist:
         ifgd = re.split('/', ifg)[-1]        
-        backups = glob.glob(os.path.join(ifg, ifgd + '_orig*{}.unw'.format(resetcode)))
+        backups = glob.glob(os.path.join(ifg, ifgd + '{}.unw.ori'.format(resetcode)))
         if len(backups) == 0:
-            print('WARNING: No backup \'_orig*{}.unw\' files found in {}! Skipping.....'.format(resetcode, ifgd))
+            print('WARNING: No backup \'{}.unw.ori\' files found in {}! Skipping.....'.format(resetcode, ifgd))
         elif len(backups) > 1:
             print('WARNING: Ambiguous as to which file is the last backup in {}! Skipping.....'.format(ifgd))
         else:
