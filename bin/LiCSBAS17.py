@@ -22,17 +22,40 @@ def compute_rms(vals_old, vals_new):
     return np.sqrt(np.mean((vals_old - vals_new_aligned) ** 2))
 
 
-def choose_union_index(dates_old, ds_old, dates_new, ds_new, method="last", user_idx=None, rms_threshold=None):
+def detect_step(vals, threshold_factor=2.0):
+    """Detecta índice del primer step significativo"""
+    diffs = np.diff(vals, axis=0)
+    threshold = threshold_factor * np.std(diffs, axis=0)
+    idx = np.where(np.abs(diffs) > threshold)[0]
+    return idx[0] + 1 if len(idx) > 0 else None
+
+
+def choose_union_index(dates_old, ds_old, dates_new, ds_new, method="varianza", user_idx=None, rms_threshold=None):
     """
     Decide dónde unir la nueva serie a la vieja.
-    - method="last": última fecha de old
-    - method="manual": índice elegido por el usuario (-1 última, -2 penúltima, etc.)
-    - method="varianza": usa coherencia en el solapamiento, con detección de outliers en los bordes
-    - rms_threshold: si None, se calcula automáticamente usando 2σ de incrementos
+    - Prioridad 1: step en ambas → unir al final de la vieja
+    - Prioridad 2: step solo en vieja → unir justo antes del step
+    - Prioridad 3: sin step → usar método ('varianza', 'manual', 'last')
     """
-    n_old = len(dates_old)
+    step_idx_old = detect_step(ds_old)
+    step_idx_new = detect_step(ds_new)
 
+    # Caso 1: step en ambas
+    if step_idx_old is not None and step_idx_new == step_idx_old:
+        union_idx = len(ds_old) - 1
+        print(f"Step en ambas series detectado. Unión en último índice de vieja: {union_idx}")
+        return union_idx
+
+    # Caso 2: step solo en vieja
+    if step_idx_old is not None and (step_idx_new != step_idx_old):
+        union_idx = step_idx_old - 1
+        print(f"Step solo en vieja. Unión justo antes del step en índice: {union_idx}")
+        return union_idx
+
+    # Caso sin step: usar método
+    n_old = len(dates_old)
     if method == "manual" and user_idx is not None:
+        print(f"Método manual. Unión en índice {user_idx}")
         return user_idx  # ejemplo: -1 última, -2 penúltima
 
     if method == "varianza":
@@ -40,7 +63,7 @@ def choose_union_index(dates_old, ds_old, dates_new, ds_new, method="last", user
         overlap = np.intersect1d(dates_old, dates_new)
         if len(overlap) == 0:
             print("⚠️ No hay solapamiento, usando última fecha")
-            return -1
+            return n_old - 1
 
         idx_old_overlap = np.where(np.isin(dates_old, overlap))[0]
         idx_new_overlap = np.where(np.isin(dates_new, overlap))[0]
@@ -48,50 +71,38 @@ def choose_union_index(dates_old, ds_old, dates_new, ds_new, method="last", user
         vals_old_overlap = ds_old[idx_old_overlap].astype(np.float64)
         vals_new_overlap = ds_new[idx_new_overlap].astype(np.float64)
 
-        # calcular rms_threshold automáticamente si no se pasa
         if rms_threshold is None:
             incr_old = np.diff(vals_old_overlap, axis=0)
             incr_new = np.diff(vals_new_overlap, axis=0)
             rms_threshold = 2 * max(np.std(incr_old), np.std(incr_new))
-            print(f"ℹ️ RMS threshold automático (2σ de incrementos) = {rms_threshold:.3f}")
+            print(f"ℹ️ RMS threshold automático = {rms_threshold:.3f}")
 
-        # RMS normal en todo el solapamiento
         rms_full = compute_rms(vals_old_overlap, vals_new_overlap)
         print(f"📊 RMS en todo el solapamiento = {rms_full:.3f}")
 
         if rms_full < rms_threshold:
-            # buena coherencia → unión en la primera fecha de solapamiento
             best_idx = idx_old_overlap[0]
-            print(f"✅ Unión en intersección (idx {best_idx}, fecha {dates_old[best_idx]})")
+            print(f"✅ Unión en intersección (idx {best_idx})")
             return best_idx
 
-        # probar quitando la última fecha del old
-        if len(idx_old_overlap) > 1:
-            rms_drop_last = compute_rms(vals_old_overlap[:-1], vals_new_overlap[:-1])
-            print(f"📊 RMS descartando última fecha old = {rms_drop_last:.3f}")
-            if rms_drop_last < rms_threshold:
-                best_idx = idx_old_overlap[0]
-                print(f"⚠️ Última fecha old parece outlier, unión en intersección (fecha {dates_old[best_idx]})")
-                return best_idx
+        # probar descartando última/penúltima fecha
+        for drop in [1, 2]:
+            if len(idx_old_overlap) > drop:
+                rms_drop = compute_rms(vals_old_overlap[:-drop], vals_new_overlap[:-drop])
+                print(f"📊 RMS descartando últimas {drop} fechas old = {rms_drop:.3f}")
+                if rms_drop < rms_threshold:
+                    best_idx = idx_old_overlap[0]
+                    print(f"⚠️ Últimas {drop} fechas old parecen outliers, unión en idx {best_idx}")
+                    return best_idx
 
-        # probar quitando penúltima y última
-        if len(idx_old_overlap) > 2:
-            rms_drop_two = compute_rms(vals_old_overlap[:-2], vals_new_overlap[:-2])
-            print(f"📊 RMS descartando últimas 2 fechas old = {rms_drop_two:.3f}")
-            if rms_drop_two < rms_threshold:
-                best_idx = idx_old_overlap[0]
-                print(f"⚠️ Últimas 2 fechas old parecen outliers, unión en intersección (fecha {dates_old[best_idx]})")
-                return best_idx
+        print("❌ Solapamiento incoherente, usando última fecha old")
+        return n_old - 1
 
-        # si nada mejora → step real → unir en la primera fecha nueva
-        print("❌ Solapamiento incoherente o step en ambas series, usando última fecha old")
-        return -1
-
-    # por defecto: última fecha
-    return -1
+    # Por defecto (si método 'last')
+    return n_old - 1
 
 
-def merge_cum_files_continuous_accumulate(file_old, file_new, file_out, method="last", user_idx=None):
+def merge_cum_files_continuous_accumulate(file_old, file_new, file_out, method="varianza", user_idx=None):
     with h5py.File(file_old, 'r') as f_old, h5py.File(file_new, 'r') as f_new:
         dates_old = f_old['imdates'][:]
         dates_new = f_new['imdates'][:]
@@ -103,7 +114,6 @@ def merge_cum_files_continuous_accumulate(file_old, file_new, file_out, method="
         temporal_dsets = ['bperp', 'cum', 'imdates']
 
         with h5py.File(file_out, 'w') as f_out:
-            # copiar datasets estáticos
             for key in f_old.keys():
                 if key not in temporal_dsets:
                     ds = f_old[key]
@@ -115,12 +125,12 @@ def merge_cum_files_continuous_accumulate(file_old, file_new, file_out, method="
             f_out.create_dataset('imdates', data=combined_dates, dtype='int32')
 
             for key in ['bperp', 'cum']:
-                ds_old = f_old[key]
-                ds_new = f_new[key]
+                ds_old = f_old[key].astype(np.float64)
+                ds_new = f_new[key].astype(np.float64)
 
                 spatial_shape = ds_old.shape[1:]
                 n_combined = len(combined_dates)
-                dset_out = f_out.create_dataset(key, shape=(n_combined, *spatial_shape), dtype=ds_old.dtype)
+                dset_out = f_out.create_dataset(key, shape=(n_combined, *spatial_shape), dtype=np.float64)
 
                 n_old = len(dates_old)
                 dset_out[:n_old] = ds_old[:]
@@ -128,15 +138,13 @@ def merge_cum_files_continuous_accumulate(file_old, file_new, file_out, method="
                 idx_new_valid = np.where(np.isin(dates_new, dates_new_valid))[0]
                 idx_combined_new = np.searchsorted(combined_dates, dates_new_valid)
 
-                vals_new_valid = ds_new[idx_new_valid].astype(np.float64)
+                vals_new_valid = ds_new[idx_new_valid]
 
-                # elegir punto base de unión
+                # Elegir punto base de unión con reglas de step
                 union_idx = choose_union_index(dates_old, ds_old, dates_new, ds_new,
                                                method=method, user_idx=user_idx)
+                last_old_value = ds_old[union_idx]
 
-                last_old_value = ds_old[union_idx].astype(np.float64)
-
-                # trabajar con incrementos de la nueva
                 increments = np.zeros_like(vals_new_valid)
                 if len(vals_new_valid) > 0:
                     increments[0] = vals_new_valid[0]
@@ -152,9 +160,9 @@ def merge_cum_files_continuous_accumulate(file_old, file_new, file_out, method="
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Combine LiCSBAS cum.h5 files for continuous accumulation")
+    parser = argparse.ArgumentParser(description="Combine LiCSBAS cum.h5 files with step detection and varianza default")
     parser.add_argument("-t", "--tsadir", required=True, help="Time-series analysis directory (e.g., TS_GEOCml1clip)")
-    parser.add_argument("--varianza", action="store_true", help="Elegir unión automáticamente usando coherencia en solapamiento")
+    parser.add_argument("--varianza", action="store_true", help="Elegir unión automáticamente usando coherencia en solapamiento (opcional)")
     parser.add_argument("--union_idx", type=int, default=None, help="Elegir índice manual (-1 última, -2 penúltima, etc.)")
 
     args = parser.parse_args()
@@ -183,119 +191,14 @@ def main():
         print(f"New file not found: {newfile}")
         sys.exit(1)
 
-    # decidir método
+    # decidir método: manual tiene prioridad, luego varianza por default
     if args.union_idx is not None:
         method = "manual"
-    elif args.varianza:
-        method = "varianza"
     else:
-        method = "last"
+        method = "varianza"
 
     merge_cum_files_continuous_accumulate(oldfile, newfile, updatefile, method=method, user_idx=args.union_idx)
 
 
 if __name__ == "__main__":
     main()
-
-
-'''
-Objetivo del script
-
-El script combina dos series de tiempo acumuladas (cum.h5) generadas por LiCSBAS:
-
-Serie antigua: ya procesada y acumulada.
-
-Serie nueva: datos recientes que se quieren unir a la antigua.
-
-El resultado es un archivo combinado (cum_update.h5) donde la acumulación es continua y se evita duplicar fechas.
-
-Flujo principal
-
-Preparación de directorios y archivos
-
-Toma un directorio de análisis de series de tiempo (TS_...).
-
-Localiza los archivos antiguos (cum.h5) y nuevos (TS_..._update/cum.h5).
-
-Crea el archivo de salida (cum_update.h5).
-
-Elección del punto de unión
-
-Si las series tienen fechas en común, se analiza el solapamiento para decidir dónde unir:
-
-Manual: el usuario elige el índice de unión.
-
-Última: se une al final de la serie vieja.
-
-Varianza: se busca coherencia en el solapamiento y se detectan posibles “steps” (cambios bruscos):
-
-Calcula el RMS (raíz del error cuadrático medio) entre los valores antiguos y nuevos en las fechas solapadas.
-
-Compara el RMS con un umbral automático, calculado como 2σ de los incrementos de la serie (diferencias entre fechas consecutivas).
-
-Esto permite distinguir cambios bruscos reales de la variabilidad normal de la serie.
-
-Si el RMS es bajo → unión en la primera fecha de solapamiento.
-
-Si el RMS es alto, prueba descartando 1 o 2 últimas fechas de la serie vieja para ver si son outliers.
-
-Si no mejora → hay un step real en ambas series → unión en la última fecha de la serie vieja.
-
-Acumulación continua
-
-Calcula los incrementos de la serie nueva.
-
-Ajusta la nueva serie para que empiece desde el valor correspondiente de la serie vieja en el punto de unión.
-
-Genera una acumulación continua sin duplicar fechas.
-
-Guardado
-
-Copia datasets estáticos (no temporales) directamente.
-
-Combina imdates, bperp y cum en el archivo de salida.
-
-Detalles técnicos clave
-
-RMS automático:
-
-Se calcula como 2σ de los incrementos en la zona de solapamiento, es decir, dos veces la desviación estándar de los cambios entre fechas consecutivas.
-
-Esto hace que el script se adapte a series con distinta variabilidad, sin depender de un valor fijo de RMS.
-
-Incrementos y acumulación
-
-La serie nueva se transforma en incrementos (Δcum) para luego sumarlos al último valor de la serie vieja.
-
-Esto garantiza que la serie combinada sea continuamente acumulada.
-
-Manejo de steps
-
-El script detecta pasos bruscos (“step”) en la serie vieja o en ambas.
-
-Según dónde esté el step, decide unir en la primera fecha de solapamiento o en la última fecha de la serie vieja.
-
-Mensajes que muestra al usuario
-
-RMS en solapamiento = ... → indica coherencia entre series.
-
-Última fecha old parece outlier → detecta si la serie vieja tiene valores atípicos.
-
-Solapamiento incoherente o step en ambas series → el script decide unir al final de la serie vieja.
-
-Combined data saved to ... → confirma que el archivo combinado se generó correctamente.
-
-Resumen visual del proceso
-Serie antigua:  |-----|-----|-----|-----|
-Serie nueva:        |-----|-----|-----|
-                    ↑ Unión ajustada por RMS
-Acumulación final: |-----|-----|-----|-----|-----|-----|-----|
-
-
-Si hay un step solo en la serie vieja → el script ajusta la unión para evitar el error.
-
-Si el step está en ambas series → la unión se hace al final de la serie vieja.
-
- En pocas palabras:
-El script garantiza que las series de tiempo acumuladas se unan de forma suave y continua, detectando automáticamente cambios bruscos y adaptando la unión según la coherencia entre las series, usando un umbral RMS automático basado en la variabilidad de los incrementos.
-'''
