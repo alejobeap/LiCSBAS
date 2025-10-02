@@ -1307,6 +1307,16 @@ def main(argv=None):
     ### Incremental displacement
     if nopngs:
         print('skipping generating additional png images of increments and residuals - as sometimes taking too long (tutorial purposes)')
+
+        ### Residual txt.  #### only 13resid.txt
+        with open(restxtfile, "w") as f:
+            print('# RMS of residual (mm)', file=f)
+        _n_para = n_ifg if n_para > n_ifg else n_para
+        print('\nOutput residual'.format(_n_para), flush=True)
+        p = q.Pool(_n_para)
+        p.map(resid_png_wrapper_nopng, range(n_ifg))
+        p.close()
+		
     else:
         _n_para = n_im-1 if n_para > n_im-1 else n_para
         print('\nOutput increment png images with {} parallel processing...'.format(_n_para), flush=True)
@@ -1518,6 +1528,16 @@ def resid_png_wrapper(i):
     if not keep_incfile:
         os.remove(infile)
 
+def resid_png_wrapper_nopng(i):
+    ifgd = ifgdates[i]
+    infile = os.path.join(resdir, '{}.res'.format(ifgd))
+    resid = io_lib.read_img(infile, length, width)
+    resid_rms = np.sqrt(np.nanmean(resid**2))
+    with open(restxtfile, "a") as f:
+        print('{} {:5.2f}'.format(ifgd, resid_rms), file=f)
+    
+    if not keep_incfile:
+        os.remove(infile)
 
 #%% main
 if __name__ == "__main__":
