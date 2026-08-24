@@ -279,7 +279,7 @@ def main(argv=None):
             elif o == '--from_model':
                 modelfile = a
                 inputresidflag = True
-             elif o == '--saveonlyfilt':
+            elif o == '--saveonlyfilt':
                 saveonlyfilt = True
 
         if not tsadir:
