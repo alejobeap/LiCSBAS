@@ -783,24 +783,58 @@ def main(argv=None):
     if filterflag:
         #%% Filter each image
         cum_filt = np.zeros((n_im, length, width), dtype=np.float32)
-        ## no filter with nan PE
-        cum_filt_nointerp = np.zeros((n_im, length, width), dtype=np.float32)
+
+        if saveonlyfilt:
+           cum_filt_nointerp = np.zeros(
+             (n_im, length, width),
+             dtype=np.float32
+           )
 
         print('\nHP filter in time, LP filter in space,', flush=True)
         if filtwidth_km == 0.0:
             print('\n(skipping spatial filter)', flush=True)
         if filtwidth_yr == 0.0:
             print('\n(skipping temporal filter)', flush=True)
-        if n_para == 1:
-            for i in range(n_im):
-                cum_filt[i, :, :] = np.float32(filter_wrapper(i))
-        else:
-            print('with {} parallel processing...'.format(n_para), flush=True)
-            ### Parallel processing
-            p = q.Pool(n_para)
-            cum_filt[:, :, :] = np.array(p.map(filter_wrapper, range(n_im)), dtype=np.float32)
-            p.close()
+        #if n_para == 1:
+        #    for i in range(n_im):
+        #        cum_filt[i, :, :] = np.float32(filter_wrapper(i))
+        #else:
+        #    print('with {} parallel processing...'.format(n_para), flush=True)
+        #    ### Parallel processing
+        #    p = q.Pool(n_para)
+        #   cum_filt[:, :, :] = np.array(p.map(filter_wrapper, range(n_im)), dtype=np.float32)
+        #   p.close()
 
+     
+        if n_para == 1:
+        
+            for i in range(n_im):
+        
+                result = filter_wrapper(i)
+        
+                if saveonlyfilt:
+                    cum_filt[i,:,:] = result[0]
+                    cum_filt_nointerp[i,:,:] = result[1]
+                else:
+                    cum_filt[i,:,:] = result
+        
+        else:
+        
+            print('with {} parallel processing...'.format(n_para), flush=True)
+        
+            p = q.Pool(n_para)
+            result = p.map(filter_wrapper, range(n_im))
+            p.close()
+        
+            if saveonlyfilt:
+        
+                for i in range(n_im):
+                    cum_filt[i,:,:] = result[i][0]
+                    cum_filt_nointerp[i,:,:] = result[i][1]
+        
+            else:
+        
+                cum_filt[:,:,:] = np.array(result, dtype=np.float32)
 
         ### Only for output increment png files
         print('\nCreate png for increment with {} parallel processing...'.format(n_para), flush=True)
@@ -961,6 +995,33 @@ def main(argv=None):
     cumh5.close()
     cumfh5.close()
 
+    if saveonlyfilt:
+    
+        outfile = os.path.join(
+            tsadir,
+            'cum_filt_nointerp.h5'
+        )
+    
+        if os.path.exists(outfile):
+            os.remove(outfile)
+    
+        with h5.File(outfile, 'w') as h5out:
+    
+            h5out.create_dataset(
+                'imdates',
+                data=imdates
+            )
+    
+            h5out.create_dataset(
+                'cum',
+                data=cum_filt_nointerp,
+                compression=compress
+            )
+    
+        print(
+            f'Saved non-interpolated file: {outfile}'
+        )
+ 
     # 
     #%% Output image
     if sbovl_abs:
@@ -1178,10 +1239,14 @@ def filter_wrapper(i):
             nanpixels = np.isnan(_cum_filt)
             _cum_filt[nanpixels] = cum_lpt[nanpixels]
             _cum_filt = _cum_filt * mask
-        #
-    return _cum_filt, _cum_filt_nointerp
+    
+    #return _cum_filt
 
 
+    if saveonlyfilt:
+       return _cum_filt, _cum_filt_nointerp
+    else:
+       return _cum_filt
 #%%
 def filter_wrapper2(i):
     ## Only for output increment png files
