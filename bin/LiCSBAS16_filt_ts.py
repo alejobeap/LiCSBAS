@@ -72,6 +72,7 @@ LiCSBAS16_filt_ts.py -t tsadir [-s filtwidth_km] [-y filtwidth_yr] [-r deg]
  --iono     ionospheric correction in azi
  --sbovl_abs sboi absolute running, closing the referencing but this is in the testing so please ask if you need to use #MN
  --saveonlyfit Save only in space and time cum_filt cum_filt_nointerp.h5 for volcanoes with steps e.g. Manda_Hararo
+ --saveonlyfilt Save an additional cum_filt_nointerp.h5 file before NaN interpolation
 
 Note: Spatial filter consume large memory. If the processing is stacked, try
  - --n_para 1
