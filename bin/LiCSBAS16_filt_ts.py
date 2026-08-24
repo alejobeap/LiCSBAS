@@ -71,6 +71,7 @@ LiCSBAS16_filt_ts.py -t tsadir [-s filtwidth_km] [-y filtwidth_yr] [-r deg]
  --tide     solid earth tide correction in azi
  --iono     ionospheric correction in azi
  --sbovl_abs sboi absolute running, closing the referencing but this is in the testing so please ask if you need to use #MN
+ --saveonlyfit Save only in space and time cum_filt cum_filt_nointerp.h5 for volcanoes with steps e.g. Manda_Hararo
 
 Note: Spatial filter consume large memory. If the processing is stacked, try
  - --n_para 1
@@ -191,6 +192,7 @@ def main(argv=None):
     sbovl_abs = False
     tide = False
     iono = False
+    saveonlyfilt = False
     try:
         n_para = len(os.sched_getaffinity(0))
     except:
@@ -220,7 +222,7 @@ def main(argv=None):
         try:
             opts, args = getopt.getopt(argv[1:], "ht:s:y:r:",
                            ["help", "demerr", "hgt_linear", "hgt_min=", "hgt_max=",
-                            "nomask", "interpolate_nans", "nofilter", "n_para=", "range=", "range_geo=",
+                            "nomask", "interpolate_nans", "saveonlyfit", "nofilter", "n_para=", "range=", "range_geo=",
                             "ex_range=", "ex_range_geo=", "gpu", "from_model=", "nopngs", "sbovl", "sbovl_abs", "tide", "iono"])
         except getopt.error as msg:
             raise Usage(msg)
@@ -276,6 +278,9 @@ def main(argv=None):
             elif o == '--from_model':
                 modelfile = a
                 inputresidflag = True
+             elif o == '--saveonlyfilt':
+                saveonlyfilt = True
+
         if not tsadir:
             raise Usage('No tsa directory given, -t is not optional!')
         elif not os.path.isdir(tsadir):
@@ -778,6 +783,8 @@ def main(argv=None):
     if filterflag:
         #%% Filter each image
         cum_filt = np.zeros((n_im, length, width), dtype=np.float32)
+        ## no filter with nan PE
+        cum_filt_nointerp = np.zeros((n_im, length, width), dtype=np.float32)
 
         print('\nHP filter in time, LP filter in space,', flush=True)
         if filtwidth_km == 0.0:
@@ -1159,6 +1166,10 @@ def filter_wrapper(i):
         pngfile = os.path.join(filtcumdir, imdates[i]+'_filt.png')
         plot_lib.make_3im_png(data3, pngfile, cmap_wrap, title3, vmin=-np.pi, vmax=np.pi, cbar=False)
 
+    # resultado antes de interpolar
+    if saveonlyfilt:
+       _cum_filt_nointerp = _cum_filt.copy()
+
     # Optionally interpolating the (unmasked) nan values of pixels
     if interpolateflag:
         if filtwidth_yr == 0.0: # in case of no temporal filter applied, let's interpolate only bilinearly in space
@@ -1168,7 +1179,7 @@ def filter_wrapper(i):
             _cum_filt[nanpixels] = cum_lpt[nanpixels]
             _cum_filt = _cum_filt * mask
         #
-    return _cum_filt
+    return _cum_filt, _cum_filt_nointerp
 
 
 #%%
